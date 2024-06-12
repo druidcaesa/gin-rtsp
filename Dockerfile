@@ -7,7 +7,7 @@ RUN go env -w GOPROXY=https://goproxy.cn,direct \
     && go build -o gin-rtsp
 
 
-FROM ubuntu
+FROM ubuntu:latest
 
 ENV TZ=Asia/Shanghai
 ENV LANG=en_US.UTF-8
