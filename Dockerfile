@@ -1,5 +1,6 @@
 FROM golang:1.20-alpine as builder
 
+
 COPY . /app
 WORKDIR /app
 ENV CGO_ENABLED=0
