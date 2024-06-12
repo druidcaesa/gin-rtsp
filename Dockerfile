@@ -12,7 +12,7 @@ RUN go env -w GOPROXY=https://goproxy.cn,direct
 RUN go mod download
 
 # 增加调试信息
-RUN go build -o main .
+RUN go build -o gin-rtsp 2>&1 | tee build.log
 
 # 第二阶段：构建最终镜像
 FROM ubuntu
@@ -30,8 +30,8 @@ RUN sed -i 's/archive.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list \
     && update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 \
     && apt-get clean && apt-get autoclean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-COPY --from=build /app/main .
+COPY --from=builder ./gin-rtsp /usr/local/bin
 
 EXPOSE 3000
 
-CMD ["./main"]
+ENTRYPOINT [ "/usr/local/bin/gin-rtsp" ]
