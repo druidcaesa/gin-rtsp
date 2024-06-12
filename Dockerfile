@@ -1,21 +1,13 @@
-# 第一阶段：编译 Go 代码
-FROM golang as builder
+FROM golang:1.20-alpine as builder
 
+COPY . /app
 WORKDIR /app
-COPY . .
-
 ENV CGO_ENABLED=0
-ENV GO111MODULE=on
+RUN go env -w GOPROXY=https://goproxy.cn,direct \
+    && go build -o gin-rtsp
 
-# 设置 Go Module 代理
-RUN go env -w GOPROXY=https://goproxy.cn,direct
-RUN go mod download
 
-# 增加调试信息
-RUN go build -o gin-rtsp 2>&1 | tee build.log
-
-# 第二阶段：构建最终镜像
-FROM ubuntu
+FROM ubuntu:18.04
 
 ENV TZ=Asia/Shanghai
 ENV LANG=en_US.UTF-8
@@ -26,11 +18,11 @@ RUN sed -i 's/archive.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list \
     && apt-get update \
     && ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && echo ${TZ} > /etc/timezone \
     && apt-get install -y locales tzdata ffmpeg \
-    && locale-gen en_US.UTF-8 \
-    && update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 \
+    && localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8 \
     && apt-get clean && apt-get autoclean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-COPY --from=builder ./gin-rtsp /usr/local/bin
+
+COPY --from=builder /app/gin-rtsp /usr/local/bin/gin-rtsp
 
 EXPOSE 3000
 
