@@ -1,6 +1,5 @@
 FROM golang as builder
 
-
 COPY . /app
 WORKDIR /app
 ENV CGO_ENABLED=0
@@ -25,6 +24,6 @@ RUN sed -i 's/archive.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list \
 
 COPY --from=builder /app/gin-rtsp /usr/local/bin/gin-rtsp
 
-EXPOSE 3000
+EXPOSE 18000
 
 ENTRYPOINT [ "/usr/local/bin/gin-rtsp" ]
